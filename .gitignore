@@ -1,0 +1,56 @@
+# 编译输出
+*.exe
+*.dll
+*.so
+*.o
+*.obj
+*.out
+*.a
+*.lib
+*.dylib
+
+# 构建目录
+build/
+bin/
+obj/
+Debug/
+Release/
+x64/
+x86/
+
+# IDE和编辑器文件
+.vs/
+.vscode/*
+!.vscode/tasks.json
+!.vscode/launch.json
+*.sln
+*.suo
+*.user
+*.userosscache
+*.sdf
+*.opensdf
+*.VC.db
+*.VC.opendb
+
+# 依赖项管理器目录
+vendor/
+
+# 系统文件
+.DS_Store
+Thumbs.db
+
+# 临时文件
+*.log
+*.tmp
+tmp/
+temp/
+
+# 备份文件
+*.bak
+*~
+
+# Visual Studio Code工作区文件
+*.code-workspace
+
+# 个人开发环境配置
+.env 
