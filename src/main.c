@@ -49,6 +49,8 @@ typedef struct {
     char title[256];       // 窗口标题
 } WINDOW_INFO;
 
+
+//常规对话UI
 POINT_DATA points[] = {
     {150, 66},  
     {267, 57},  
@@ -62,6 +64,23 @@ COLOR_RANGE color_ranges[] = {
     {9, 13, 7, 11, 5, 9},
     {9, 13, 7, 11, 4, 8}
 };
+
+//黑屏型
+POINT_DATA points1[] = {
+    {955, 1026},  
+    {961, 1032},  
+    {966, 1026},  
+    {960, 1026}   
+};
+
+COLOR_RANGE color_ranges1[] = {
+    {221, 225, 204, 208, 155, 159},  // 第一个点的颜色范围
+    {221, 225, 199, 203, 151, 155},  // 第二个点的颜色范围
+    {221, 225, 200, 204, 152, 156},
+    {4, 8, 0, 4, 0, 4}
+};
+
+
 
 // 确保DPI感知
 void SetDpiAwareness() {
@@ -243,7 +262,7 @@ BOOL CheckMultiplePixels(HWND hwnd, POINT_DATA* points, COLOR_RANGE* color_range
     // 释放位图
     DeleteObject(hBitmap);
     
-    return match_count >= 3;
+    return match_count >= point_count * 0.75;
 }
 
 // 修改坐标初始化函数，调整为考虑客户区域的缩放
@@ -263,10 +282,10 @@ void InitPoints(WINDOW_INFO window_info, POINT_DATA* scaled_points, int point_co
     
     // 缩放所有点
     for (int i = 0; i < point_count; i++) {
-        scaled_points[i].x = (int)(points[i].x * scale);
-        scaled_points[i].y = (int)(points[i].y * scale);
-        Con_Debug("点 %d: 原始(%d,%d) -> 缩放后(%d,%d)", 
-            i+1, points[i].x, points[i].y, scaled_points[i].x, scaled_points[i].y);
+        Con_Debug("点 %d: 原始(%d,%d)" , i + 1, scaled_points[i].x, scaled_points[i].y);
+        scaled_points[i].x = (int)(scaled_points[i].x * scale);   
+        scaled_points[i].y = (int)(scaled_points[i].y * scale);
+        Con_Debug(" -> 缩放后(%d,%d)", scaled_points[i].x, scaled_points[i].y);
     }
 }
 
@@ -331,6 +350,7 @@ int main(int argc, char* argv[]) {
     Con_Info("客户区偏移: x=%d, y=%d", window_info.client_offset.x, window_info.client_offset.y);
     
     InitPoints(window_info, points, 4);
+    InitPoints(window_info, points1, 4);
 
     Con_Info("开始自动点击剧情中(当检测到进入剧情时会自动点击)...");
     Con_Info("按" ANSI_BLUE("Ctrl+p") "键暂停.");
@@ -366,6 +386,17 @@ int main(int argc, char* argv[]) {
                 Sleep(75);
                 PostMessageW(hwnd, WM_KEYUP, 0x31, 0xC0210001);
             }
+            else if(CheckMultiplePixels(hwnd, points1, color_ranges1, 4)) {
+                if(afterDialog > 0) {
+                    afterDialog = 0;
+                    Con_Info("检测到进入剧情对话(黑屏型)");
+                }
+                // 发送点击空格键的消息
+                SetForegroundWindow(hwnd);
+                PostMessageW(hwnd, WM_KEYDOWN, 0x20, 0x210001);
+                Sleep(75);
+                PostMessageW(hwnd, WM_KEYUP, 0x20, 0xC0210001);
+            }
             else if(afterDialog == 0) {
                 afterDialog = 16;
                 Con_Info("剧情对话结束");
@@ -378,7 +409,7 @@ int main(int argc, char* argv[]) {
         }
         Sleep(125);  
     }
-    
+
     Con_Info("程序已退出");
     
     return 0;
